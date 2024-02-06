@@ -24,18 +24,21 @@ class DbHelper {
     );
   }
 
+  // Insert Contact
   Future<int> insertContact(ContactModel contactModel) async {
     final db = await _open();
-    print('insert successful');
     return db.insert(tblContact, contactModel.toMap());
   }
 
-//   Get all contact from table
-
+  //  Get all contact from table
   Future<List<ContactModel>> getAllContact() async {
     final db = await _open();
     final List<Map<String, dynamic>> mapList = await db.query(tblContact);
-    print("get all contact from db helper called");
     return List.generate(mapList.length, (index) => ContactModel.fromMap(mapList[index]));
+  }
+  // Update table tbl_contact favourite 1 where id = 1
+  Future<int> updateTableSingleColumn(int rowId, Map<String, dynamic> map) async {
+    final db = await _open();
+    return db.update(tblContact, map, where: '$tblContactColId = ?', whereArgs: [rowId]);
   }
 }
