@@ -22,4 +22,10 @@ class ContactProvider extends ChangeNotifier {
     await getAllContact();
     return id;
   }
+
+  Future<int> deleteContact(int rowId) async {
+    var id = db.deleteContact(rowId);
+    await getAllContact();
+    return  id;
+  }
 }

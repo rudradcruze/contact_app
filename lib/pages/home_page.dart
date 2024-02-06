@@ -29,21 +29,62 @@ class HomePage extends StatelessWidget {
                 itemCount: provider.contactList.length,
                 itemBuilder: (context, index) {
                   final contact = provider.contactList[index];
-                  return ListTile(
-                    title: Text(contact.name),
-                    trailing: IconButton(
-                      onPressed: () {
-                        final value = contact.favorite ? 0 : 1;
-                        context
-                            .read<ContactProvider>()
-                            .updateContactSingleColumn(
-                                contact.id!, tblContactColFavorite, value);
-                      },
-                      icon: Icon(
-                        contact.favorite
-                            ? Icons.favorite
-                            : Icons.favorite_border,
-                        color: Colors.red,
+                  return Dismissible(
+                    key: UniqueKey(),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      color: Colors.red,
+                      alignment: Alignment.centerRight,
+                      child: const Icon(
+                        Icons.delete,
+                        size: 25,
+                        color: Colors.white,
+                      ),
+                    ),
+                    confirmDismiss: (_) {
+                      return showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                                title: const Text('Delete Contact?'),
+                                content: Text(
+                                    'Are you sure to delete contact ${contact.name}'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context, false);
+                                    },
+                                    child: const Text('CANCEL'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context, true);
+                                    },
+                                    child: const Text('YES'),
+                                  ),
+                                ],
+                              ));
+                    },
+                    onDismissed: (_) {
+                      context
+                          .read<ContactProvider>()
+                          .deleteContact(contact.id!);
+                    },
+                    child: ListTile(
+                      title: Text(contact.name),
+                      trailing: IconButton(
+                        onPressed: () {
+                          final value = contact.favorite ? 0 : 1;
+                          context
+                              .read<ContactProvider>()
+                              .updateContactSingleColumn(
+                                  contact.id!, tblContactColFavorite, value);
+                        },
+                        icon: Icon(
+                          contact.favorite
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: Colors.red,
+                        ),
                       ),
                     ),
                   );
