@@ -26,6 +26,16 @@ class DbHelper {
 
   Future<int> insertContact(ContactModel contactModel) async {
     final db = await _open();
+    print('insert successful');
     return db.insert(tblContact, contactModel.toMap());
+  }
+
+//   Get all contact from table
+
+  Future<List<ContactModel>> getAllContact() async {
+    final db = await _open();
+    final List<Map<String, dynamic>> mapList = await db.query(tblContact);
+    print("get all contact from db helper called");
+    return List.generate(mapList.length, (index) => ContactModel.fromMap(mapList[index]));
   }
 }
