@@ -37,6 +37,13 @@ class DbHelper {
     return List.generate(mapList.length, (index) => ContactModel.fromMap(mapList[index]));
   }
 
+  //  Get all favourite contact from table
+  Future<List<ContactModel>> getAllFavouriteContact() async {
+    final db = await _open();
+    final List<Map<String, dynamic>> mapList = await db.query(tblContact, where: '$tblContactColFavorite = ?', whereArgs: [1]);
+    return List.generate(mapList.length, (index) => ContactModel.fromMap(mapList[index]));
+  }
+
   // Update table tbl_contact favourite 1 where id = 1
   Future<int> updateTableSingleColumn(int rowId, Map<String, dynamic> map) async {
     final db = await _open();

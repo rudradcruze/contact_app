@@ -17,6 +17,11 @@ class ContactProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> getAllFavouriteContact() async {
+    contactList =  await db.getAllFavouriteContact();
+    notifyListeners();
+  }
+
   Future<int> updateContactSingleColumn(int rowId, String column, dynamic value) async {
     final id = db.updateTableSingleColumn(rowId, {column: value});
     await getAllContact();
