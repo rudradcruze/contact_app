@@ -17,6 +17,10 @@ class ContactProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  ContactModel getContactFromCash(int id) => contactList.firstWhere((contact) => contact.id == id);
+
+  Future<ContactModel> getContactById(int id) async => db.getContactByIdFromDb(id);
+
   Future<void> getAllFavouriteContact() async {
     contactList =  await db.getAllFavouriteContact();
     notifyListeners();

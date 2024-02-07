@@ -1,4 +1,5 @@
 import 'package:contact_app/model/contact_model.dart';
+import 'package:contact_app/pages/details_page.dart';
 import 'package:contact_app/pages/new_contact_page.dart';
 import 'package:contact_app/providers/contact_provider.dart';
 import 'package:flutter/material.dart';
@@ -115,7 +116,9 @@ class _HomePageState extends State<HomePage> {
                           .deleteContact(contact.id!);
                     },
                     child: ListTile(
+                      onTap: () => Navigator.pushNamed(context, DetailsPage.routeName, arguments: contact.id),
                       title: Text(contact.name),
+                      subtitle: Text(contact.number),
                       trailing: IconButton(
                         onPressed: () {
                           final value = contact.favorite ? 0 : 1;
