@@ -17,10 +17,15 @@ class DbHelper {
     final dbPath = path.join(root, 'contact.db');
     return openDatabase(
       dbPath,
-      version: 1,
+      version: 2,
       onCreate: (db, version) {
         db.execute(_createTableContact);
       },
+      onUpgrade: (db, int oldVersion, int newVersion) {
+        if (newVersion == 2) {
+          db.execute('alter table $tblContact add column $tblContactColImage text default ""');
+        }
+      }
     );
   }
 

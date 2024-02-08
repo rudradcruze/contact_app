@@ -5,6 +5,7 @@ const String tblContactColEmail = 'email';
 const String tblContactColNumber = 'number';
 const String tblContactColAddress = 'address';
 const String tblContactColWebsite = 'website';
+const String tblContactColImage = 'image';
 const String tblContactColFavorite = 'favorite';
 
 class ContactModel {
@@ -14,6 +15,7 @@ class ContactModel {
   String? email;
   String? address;
   String? website;
+  String? image;
   bool favorite = false;
 
   ContactModel(
@@ -23,6 +25,7 @@ class ContactModel {
       this.email,
       this.address,
       this.website,
+      this.image,
       this.favorite = false});
 
   factory ContactModel.fromMap(Map<String, dynamic> map) => ContactModel(
@@ -32,6 +35,7 @@ class ContactModel {
         email: map[tblContactColEmail],
         address: map[tblContactColAddress],
         website: map[tblContactColWebsite],
+        image: map[tblContactColImage],
         favorite: map[tblContactColFavorite] == 1 ? true : false,
       );
 
@@ -42,6 +46,7 @@ class ContactModel {
       tblContactColEmail: email,
       tblContactColAddress: address,
       tblContactColWebsite: website,
+      tblContactColImage: image,
       tblContactColFavorite: favorite ? 1 : 0,
     };
 
