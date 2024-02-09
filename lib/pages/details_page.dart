@@ -5,7 +5,7 @@ import 'package:contact_app/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher_string.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../model/contact_model.dart';
 
@@ -91,7 +91,7 @@ class _DetailsPageState extends State<DetailsPage> {
                                 actions: [
                                   TextButton(
                                     onPressed: () {
-                                      // Navigator.of(context).pop();
+                                      Navigator.of(context).pop();
                                     },
                                     child: const Text(
                                       'CANCEL',
@@ -102,7 +102,6 @@ class _DetailsPageState extends State<DetailsPage> {
                                     onPressed: () {
                                       updateImage(
                                           context, id, ImageSource.camera);
-                                      // Navigator.of(context).pop();
                                     },
                                     child: const Icon(Icons.camera_alt),
                                   ),
@@ -110,7 +109,6 @@ class _DetailsPageState extends State<DetailsPage> {
                                     onPressed: () {
                                       updateImage(
                                           context, id, ImageSource.gallery);
-                                      // Navigator.of(context).pop();
                                     },
                                     child: const Icon(Icons.photo_library),
                                   ),
@@ -181,7 +179,61 @@ class _DetailsPageState extends State<DetailsPage> {
                   ],
                 ),
               ),
-            )
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: ListTile(
+                title: Text(contact.website!.isEmpty ? 'Enter Website' : contact.website!),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        editContact(context, tblContactColWebsite, controller, Icons.language, contact.website, id);
+                      },
+                      icon: const Icon(Icons.edit),
+                    ),
+                    IconButton(
+                      onPressed: ()  async {
+                        if (contact.website!.isNotEmpty) {
+                          _lunchUrl(context, contact.website, 3);
+                        } else {
+                          _showEmptyWarning('Website cannot empty! please fill up it.');
+                        }
+                      },
+                      icon: const Icon(Icons.language),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: ListTile(
+                title: Text(contact.address!.isEmpty ? 'Enter Address' : contact.address!),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        editContact(context, tblContactColAddress, controller, Icons.streetview, contact.address, id);
+                      },
+                      icon: const Icon(Icons.edit),
+                    ),
+                    IconButton(
+                      onPressed: ()  async {
+                        if (contact.address!.isNotEmpty) {
+                          _lunchUrl(context, contact.address, 4);
+                        } else {
+                          _showEmptyWarning('Address cannot empty! please fill up it.');
+                        }
+                      },
+                      icon: const Icon(Icons.streetview),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -200,18 +252,29 @@ class _DetailsPageState extends State<DetailsPage> {
   }
 
   void _lunchUrl(BuildContext context, dynamic data, int num) async {
-    String urlString = '';
-    if (num == 0) {
-      urlString = 'tel:$data';
-    } else if(num == 1) {
-      urlString = 'sms:$data';
-    } else if(num == 2) {
-      urlString = 'mailto:$data';
+    // String urlString = '';
+    var url;
+    switch(num) {
+      case 0: url = Uri(scheme: 'tel', path: data);
+      case 1: url = Uri(scheme: 'sms', path: data);
+      case 2: url = Uri(scheme: 'mailto', path: data);
+      case 3: url = Uri(scheme: 'https', path: data);
+      case 4: {
+        if (Platform.isAndroid) {
+          url = 'geo:0,0?q=$data';
+        } else {
+          url = 'http://maps.apple.com/?q=$data';
+        }
+        if (await canLaunch(url)) {
+          await launch(url);
+        } else {
+          showMessage(context, 'Could not perform this operation.');
+        }
+      }
     }
 
-
-    if (await canLaunchUrlString(urlString)) {
-      await launchUrlString(urlString);
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
     } else {
       showMessage(context, 'Could not perform this operation.');
     }
