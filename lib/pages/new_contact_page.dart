@@ -153,6 +153,9 @@ class _NewContactPageState extends State<NewContactPage> {
   void dispose() {
     nameController.dispose();
     mobileController.dispose();
+    emailController.dispose();
+    addressController.dispose();
+    webController.dispose();
     super.dispose();
   }
 }

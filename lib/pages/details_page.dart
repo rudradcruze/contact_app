@@ -9,15 +9,24 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 import '../model/contact_model.dart';
 
-class DetailsPage extends StatelessWidget {
+class DetailsPage extends StatefulWidget {
   const DetailsPage({super.key});
 
   static const String routeName = '/details';
+  final bool isEmailActivate = true;
+
+  @override
+  State<DetailsPage> createState() => _DetailsPageState();
+}
+
+class _DetailsPageState extends State<DetailsPage> {
+  final fromEditKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     final id = ModalRoute.of(context)!.settings.arguments as int;
     final contact = context.watch<ContactProvider>().getContactFromCash(id);
+    final controller = TextEditingController();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Details'),
@@ -82,7 +91,7 @@ class DetailsPage extends StatelessWidget {
                                 actions: [
                                   TextButton(
                                     onPressed: () {
-                                      Navigator.pop(context, false);
+                                      // Navigator.of(context).pop();
                                     },
                                     child: const Text(
                                       'CANCEL',
@@ -93,7 +102,7 @@ class DetailsPage extends StatelessWidget {
                                     onPressed: () {
                                       updateImage(
                                           context, id, ImageSource.camera);
-                                      Navigator.pop(context, true);
+                                      // Navigator.of(context).pop();
                                     },
                                     child: const Icon(Icons.camera_alt),
                                   ),
@@ -101,7 +110,7 @@ class DetailsPage extends StatelessWidget {
                                     onPressed: () {
                                       updateImage(
                                           context, id, ImageSource.gallery);
-                                      Navigator.pop(context, true);
+                                      // Navigator.of(context).pop();
                                     },
                                     child: const Icon(Icons.photo_library),
                                   ),
@@ -126,13 +135,48 @@ class DetailsPage extends StatelessWidget {
                   children: [
                     IconButton(
                       onPressed: () {
-                        _callContact(context, contact.number);
+                        editContact(context, tblContactColNumber, controller, Icons.call, contact.number, id);
+                      },
+                      icon: const Icon(Icons.edit),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        _lunchUrl(context, contact.number, 0);
                       },
                       icon: const Icon(Icons.call),
                     ),
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        _lunchUrl(context, contact.number, 1);
+                      },
                       icon: const Icon(Icons.message),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: ListTile(
+                title: Text(contact.email!.isEmpty ? 'Enter email' : contact.email!),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        editContact(context, tblContactColEmail, controller, Icons.email, contact.email, id);
+                      },
+                      icon: const Icon(Icons.edit),
+                    ),
+                    IconButton(
+                      onPressed: ()  {
+                        if (contact.email!.isNotEmpty) {
+                          _lunchUrl(context, contact.email, 2);
+                        } else {
+                          _showEmptyWarning('Email cannot empty! please fill up it.');
+                        }
+                      },
+                      icon: const Icon(Icons.email),
                     ),
                   ],
                 ),
@@ -152,10 +196,20 @@ class DetailsPage extends StatelessWidget {
           .read<ContactProvider>()
           .updateContactSingleColumn(id, tblContactColImage, path);
     }
+    Navigator.of(context).pop();
   }
 
-  void _callContact(BuildContext context, String number) async {
-    final urlString = 'tel:$number';
+  void _lunchUrl(BuildContext context, dynamic data, int num) async {
+    String urlString = '';
+    if (num == 0) {
+      urlString = 'tel:$data';
+    } else if(num == 1) {
+      urlString = 'sms:$data';
+    } else if(num == 2) {
+      urlString = 'mailto:$data';
+    }
+
+
     if (await canLaunchUrlString(urlString)) {
       await launchUrlString(urlString);
     } else {
@@ -163,112 +217,72 @@ class DetailsPage extends StatelessWidget {
     }
   }
 
-/*FutureBuilder<ContactModel> buildFutureBuilder(ContactProvider provider, int id) {
-    return FutureBuilder<ContactModel>(
-        future: provider.getContactById(id),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final contact = snapshot.data!;
-            return ListView(
-              children: [
-                Stack(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 10.0),
-                      child: Center(
-                        child:
-                            contact.image == "null" || contact.image!.isEmpty
-                                ? CircleAvatar(
-                                    radius: 60.0,
-                                    backgroundColor: Colors.purple.shade300,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8),
-                                      child: ClipOval(
-                                        child: SizedBox.fromSize(
-                                          size: const Size.fromRadius(52),
-                                          child: Image.asset(
-                                            'images/placeholder.png',
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                : CircleAvatar(
-                                    radius: 60.0,
-                                    backgroundColor: Colors.purple.shade300,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8),
-                                      child: ClipOval(
-                                        child: SizedBox.fromSize(
-                                          size: const Size.fromRadius(52),
-                                          child: Image.file(
-                                            contact.image as File,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 140,
-                      child: FloatingActionButton.small(
-                        backgroundColor: Colors.purple.shade100,
-                        onPressed: () {
-                          showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text('Edit Image'),
-                                content: const Text('Choose image from camera or gallery!'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context, false);
-                                    },
-                                    child: const Text('CANCEL', style: TextStyle(color: Colors.red),),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      updateImage(ImageSource.camera);
-                                    },
-                                    child: const Icon(Icons.camera_alt),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context, false);
-                                    },
-                                    child: const Icon(Icons.photo_library),
-                                  ),
-                                ],
-                              ));
-                        },
-                        shape: const CircleBorder(),
-                        child: const Icon(
-                          Icons.edit,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                ListTile(
-                  title: Text(contact.number),
-                )
-              ],
-            );
-          }
-          if (snapshot.hasError) {
-            return Center(
-              child: Text(snapshot.error.toString()),
-            );
-          }
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        },
-      );
-  }*/
+  void editContact(BuildContext context, String column, TextEditingController controller, IconData iconData, dynamic data, int id) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Edit $column'),
+          content: Form(
+            key: fromEditKey,
+            child: TextFormField(
+              controller: controller,
+              decoration: InputDecoration(
+                  prefixIcon: Icon(iconData),
+                hintText: data,
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'This field must not be empty';
+                }
+                return null;
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'CANCEL',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                updateContact(fromEditKey, context, id, column, controller);
+              },
+              child: const Text(
+                'UPDATE',
+              ),
+            ),
+          ],
+        ));
+  }
+
+  void updateContact(GlobalKey<FormState> fromEditKey, BuildContext context, int id, String column, TextEditingController controller) {
+    if (fromEditKey.currentState!.validate()) {
+      context.read<ContactProvider>().updateContactSingleColumn(id, column, controller.text);
+    } else {
+      debugPrint("Something went wrong");
+    }
+    Navigator.of(context).pop();
+  }
+
+  void _showEmptyWarning(String s) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Empty Value'),
+          content: Text(s),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: const Text('OKAY'),
+            ),
+          ],
+        ));
+  }
 }
