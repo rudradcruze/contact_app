@@ -24,7 +24,10 @@ class _DetailsPageState extends State<DetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final id = ModalRoute.of(context)!.settings.arguments as int;
+    final id = ModalRoute
+        .of(context)!
+        .settings
+        .arguments as int;
     final contact = context.watch<ContactProvider>().getContactFromCash(id);
     final controller = TextEditingController();
     return Scaffold(
@@ -32,210 +35,259 @@ class _DetailsPageState extends State<DetailsPage> {
         title: const Text('Details'),
       ),
       body: Consumer<ContactProvider>(
-        builder: (context, provider, child) => ListView(
-          children: [
-            Stack(
+        builder: (context, provider, child) =>
+            ListView(
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0),
-                  child: Center(
-                    child: contact.image == null || contact.image!.isEmpty
-                        ? CircleAvatar(
-                            radius: 60.0,
-                            backgroundColor: Colors.purple.shade300,
-                            child: Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: ClipOval(
-                                child: SizedBox.fromSize(
-                                  size: const Size.fromRadius(52),
-                                  child: Image.asset(
-                                    'images/placeholder.png',
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          )
-                        : CircleAvatar(
-                            radius: 60.0,
-                            backgroundColor: Colors.purple.shade300,
-                            child: Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: ClipOval(
-                                child: SizedBox.fromSize(
-                                  size: const Size.fromRadius(52),
-                                  child: Image.file(
-                                    File(
-                                      contact.image!,
-                                    ),
-                                    fit: BoxFit.cover,
-                                  ),
+                Stack(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10.0),
+                      child: Center(
+                        child: contact.image == null || contact.image!.isEmpty
+                            ? CircleAvatar(
+                          radius: 60.0,
+                          backgroundColor: Colors.purple.shade300,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: ClipOval(
+                              child: SizedBox.fromSize(
+                                size: const Size.fromRadius(52),
+                                child: Image.asset(
+                                  'images/placeholder.png',
+                                  fit: BoxFit.cover,
                                 ),
                               ),
                             ),
                           ),
+                        )
+                            : CircleAvatar(
+                          radius: 60.0,
+                          backgroundColor: Colors.purple.shade300,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: ClipOval(
+                              child: SizedBox.fromSize(
+                                size: const Size.fromRadius(52),
+                                child: Image.file(
+                                  File(
+                                    contact.image!,
+                                  ),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 140,
+                      child: FloatingActionButton.small(
+                        backgroundColor: Colors.purple.shade100,
+                        onPressed: () {
+                          showDialog(
+                              context: context,
+                              builder: (context) =>
+                                  AlertDialog(
+                                    title: const Text('Edit Image'),
+                                    content: const Text(
+                                        'Choose image from camera or gallery!'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text(
+                                          'CANCEL',
+                                          style: TextStyle(color: Colors.red),
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          updateImage(
+                                              context, id, ImageSource.camera);
+                                        },
+                                        child: const Icon(Icons.camera_alt),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          updateImage(
+                                              context, id, ImageSource.gallery);
+                                        },
+                                        child: const Icon(Icons.photo_library),
+                                      ),
+                                    ],
+                                  ));
+                        },
+                        shape: const CircleBorder(),
+                        child: const Icon(
+                          Icons.edit,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: ListTile(
+                    title: Text(contact.number),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            showSingleTextInputDialog(context: context,
+                              title: 'Edit Number',
+                              hintText: '${contact.number}',
+                              iconData: Icons.call,
+                              onSave: (value) {
+                                Provider.of<ContactProvider>(
+                                    context, listen: false)
+                                    .updateContactSingleColumn(
+                                    id, tblContactColNumber, value);
+                              },);
+                          },
+                          icon: const Icon(Icons.edit),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            _lunchUrl(context, contact.number, 0);
+                          },
+                          icon: const Icon(Icons.call),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            _lunchUrl(context, contact.number, 1);
+                          },
+                          icon: const Icon(Icons.message),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                Positioned(
-                  bottom: 0,
-                  right: 140,
-                  child: FloatingActionButton.small(
-                    backgroundColor: Colors.purple.shade100,
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                                title: const Text('Edit Image'),
-                                content: const Text(
-                                    'Choose image from camera or gallery!'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text(
-                                      'CANCEL',
-                                      style: TextStyle(color: Colors.red),
-                                    ),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      updateImage(
-                                          context, id, ImageSource.camera);
-                                    },
-                                    child: const Icon(Icons.camera_alt),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      updateImage(
-                                          context, id, ImageSource.gallery);
-                                    },
-                                    child: const Icon(Icons.photo_library),
-                                  ),
-                                ],
-                              ));
-                    },
-                    shape: const CircleBorder(),
-                    child: const Icon(
-                      Icons.edit,
-                      size: 20,
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: ListTile(
+                    title: Text(contact.email!.isEmpty ? 'Enter email' : contact
+                        .email!),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            showSingleTextInputDialog(
+                              context: context,
+                              title: 'Edit Email',
+                              hintText: '${contact.email}',
+                              textInputType: TextInputType.emailAddress,
+                              iconData: Icons.email,
+                              onSave: (value) {
+                                Provider.of<ContactProvider>(
+                                    context, listen: false)
+                                    .updateContactSingleColumn(
+                                    id, tblContactColEmail, value);
+                              },
+                            );
+                          },
+                          icon: const Icon(Icons.edit),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            if (contact.email!.isNotEmpty) {
+                              _lunchUrl(context, contact.email, 2);
+                            } else {
+                              _showEmptyWarning(
+                                  'Email cannot empty! please fill up it.');
+                            }
+                          },
+                          icon: const Icon(Icons.email),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: ListTile(
+                    title: Text(
+                        contact.website!.isEmpty ? 'Enter Website' : contact
+                            .website!),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            showSingleTextInputDialog(context: context,
+                              title: 'Edit Website',
+                              hintText: '${contact.website}',
+                              iconData: Icons.language,
+                              onSave: (value) {
+                                Provider.of<ContactProvider>(
+                                    context, listen: false)
+                                    .updateContactSingleColumn(
+                                    id, tblContactColWebsite, value);
+                              },);
+                          },
+                          icon: const Icon(Icons.edit),
+                        ),
+                        IconButton(
+                          onPressed: () async {
+                            if (contact.website!.isNotEmpty) {
+                              _lunchUrl(context, contact.website, 3);
+                            } else {
+                              _showEmptyWarning(
+                                  'Website cannot empty! please fill up it.');
+                            }
+                          },
+                          icon: const Icon(Icons.language),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: ListTile(
+                    title: Text(
+                        contact.address!.isEmpty ? 'Enter Address' : contact
+                            .address!),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            showSingleTextInputDialog(context: context,
+                              title: 'Edit Address',
+                              hintText: '${contact.address}',
+                              iconData: Icons.streetview,
+                              onSave: (value) {
+                                Provider.of<ContactProvider>(
+                                    context, listen: false)
+                                    .updateContactSingleColumn(
+                                    id, tblContactColAddress, value);
+                              },);
+                          },
+                          icon: const Icon(Icons.edit),
+                        ),
+                        IconButton(
+                          onPressed: () async {
+                            if (contact.address!.isNotEmpty) {
+                              _lunchUrl(context, contact.address, 4);
+                            } else {
+                              _showEmptyWarning(
+                                  'Address cannot empty! please fill up it.');
+                            }
+                          },
+                          icon: const Icon(Icons.streetview),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: ListTile(
-                title: Text(contact.number),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        editContact(context, tblContactColNumber, controller, Icons.call, contact.number, id);
-                      },
-                      icon: const Icon(Icons.edit),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        _lunchUrl(context, contact.number, 0);
-                      },
-                      icon: const Icon(Icons.call),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        _lunchUrl(context, contact.number, 1);
-                      },
-                      icon: const Icon(Icons.message),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: ListTile(
-                title: Text(contact.email!.isEmpty ? 'Enter email' : contact.email!),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        editContact(context, tblContactColEmail, controller, Icons.email, contact.email, id);
-                      },
-                      icon: const Icon(Icons.edit),
-                    ),
-                    IconButton(
-                      onPressed: ()  {
-                        if (contact.email!.isNotEmpty) {
-                          _lunchUrl(context, contact.email, 2);
-                        } else {
-                          _showEmptyWarning('Email cannot empty! please fill up it.');
-                        }
-                      },
-                      icon: const Icon(Icons.email),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: ListTile(
-                title: Text(contact.website!.isEmpty ? 'Enter Website' : contact.website!),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        editContact(context, tblContactColWebsite, controller, Icons.language, contact.website, id);
-                      },
-                      icon: const Icon(Icons.edit),
-                    ),
-                    IconButton(
-                      onPressed: ()  async {
-                        if (contact.website!.isNotEmpty) {
-                          _lunchUrl(context, contact.website, 3);
-                        } else {
-                          _showEmptyWarning('Website cannot empty! please fill up it.');
-                        }
-                      },
-                      icon: const Icon(Icons.language),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: ListTile(
-                title: Text(contact.address!.isEmpty ? 'Enter Address' : contact.address!),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        editContact(context, tblContactColAddress, controller, Icons.streetview, contact.address, id);
-                      },
-                      icon: const Icon(Icons.edit),
-                    ),
-                    IconButton(
-                      onPressed: ()  async {
-                        if (contact.address!.isNotEmpty) {
-                          _lunchUrl(context, contact.address, 4);
-                        } else {
-                          _showEmptyWarning('Address cannot empty! please fill up it.');
-                        }
-                      },
-                      icon: const Icon(Icons.streetview),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -254,23 +306,28 @@ class _DetailsPageState extends State<DetailsPage> {
   void _lunchUrl(BuildContext context, dynamic data, int num) async {
     // String urlString = '';
     var url;
-    switch(num) {
-      case 0: url = Uri(scheme: 'tel', path: data);
-      case 1: url = Uri(scheme: 'sms', path: data);
-      case 2: url = Uri(scheme: 'mailto', path: data);
-      case 3: url = Uri(scheme: 'https', path: data);
-      case 4: {
-        if (Platform.isAndroid) {
-          url = 'geo:0,0?q=$data';
-        } else {
-          url = 'http://maps.apple.com/?q=$data';
+    switch (num) {
+      case 0:
+        url = Uri(scheme: 'tel', path: data);
+      case 1:
+        url = Uri(scheme: 'sms', path: data);
+      case 2:
+        url = Uri(scheme: 'mailto', path: data);
+      case 3:
+        url = Uri(scheme: 'https', path: data);
+      case 4:
+        {
+          if (Platform.isAndroid) {
+            url = 'geo:0,0?q=$data';
+          } else {
+            url = 'http://maps.apple.com/?q=$data';
+          }
+          if (await canLaunch(url)) {
+            await launch(url);
+          } else {
+            showMessage(context, 'Could not perform this operation.');
+          }
         }
-        if (await canLaunch(url)) {
-          await launch(url);
-        } else {
-          showMessage(context, 'Could not perform this operation.');
-        }
-      }
     }
 
     if (await canLaunchUrl(url)) {
@@ -280,72 +337,79 @@ class _DetailsPageState extends State<DetailsPage> {
     }
   }
 
-  void editContact(BuildContext context, String column, TextEditingController controller, IconData iconData, dynamic data, int id) {
+/*  void editContact(BuildContext context, String column,
+      TextEditingController controller, IconData iconData, dynamic data,
+      int id) {
     showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Edit $column'),
-          content: Form(
-            key: fromEditKey,
-            child: TextFormField(
-              controller: controller,
-              decoration: InputDecoration(
-                  prefixIcon: Icon(iconData),
-                hintText: data,
+        builder: (context) =>
+            AlertDialog(
+              title: Text('Edit $column'),
+              content: Form(
+                key: fromEditKey,
+                child: TextFormField(
+                  controller: controller,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(iconData),
+                    hintText: data,
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'This field must not be empty';
+                    }
+                    return null;
+                  },
+                ),
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'This field must not be empty';
-                }
-                return null;
-              },
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'CANCEL',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                updateContact(fromEditKey, context, id, column, controller);
-              },
-              child: const Text(
-                'UPDATE',
-              ),
-            ),
-          ],
-        ));
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'CANCEL',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // showSingleTextInputDialog(context: context, title: title, hintText: hintText, iconData: iconData, onSave: onSave);
+                    // updateContact(fromEditKey, context, id, column, controller);
+                  },
+                  child: const Text(
+                    'UPDATE',
+                  ),
+                ),
+              ],
+            ));
   }
 
-  void updateContact(GlobalKey<FormState> fromEditKey, BuildContext context, int id, String column, TextEditingController controller) {
+  void updateContact(GlobalKey<FormState> fromEditKey, BuildContext context,
+      int id, String column, TextEditingController controller) {
     if (fromEditKey.currentState!.validate()) {
-      context.read<ContactProvider>().updateContactSingleColumn(id, column, controller.text);
+      context.read<ContactProvider>().updateContactSingleColumn(
+          id, column, controller.text);
     } else {
       debugPrint("Something went wrong");
     }
     Navigator.of(context).pop();
-  }
+  }*/
 
   void _showEmptyWarning(String s) {
     showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Empty Value'),
-          content: Text(s),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context, true);
-              },
-              child: const Text('OKAY'),
-            ),
-          ],
-        ));
+        builder: (context) =>
+            AlertDialog(
+              title: const Text('Empty Value'),
+              content: Text(s),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                  child: const Text('OKAY'),
+                ),
+              ],
+            ));
   }
 }
